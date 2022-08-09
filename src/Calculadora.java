@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.util.Objects;
 
 public class Calculadora extends JFrame{
     private JLabel ScreenTXT;
@@ -32,6 +34,11 @@ public class Calculadora extends JFrame{
     private JButton btnTan;
     private JButton btnOff;
     private JButton btnON;
+    private JButton lightButton;
+    private JButton darkButton;
+    private JButton shiftButton;
+    private JButton btnElevado;
+    private JButton btnFact;
 
     //VARIABLES
     double num1=0;
@@ -39,11 +46,15 @@ public class Calculadora extends JFrame{
     double num2=0;
     double result=0;
     boolean encendido=false;
+    boolean shift = false;
+
+    //ELIMINA NOTACION CIENTIFICA EN EXP
+    DecimalFormat df = new DecimalFormat("#");
 
     public Calculadora() {
         setContentPane(calcuPanel);
         setTitle("Calculadora");
-        setMinimumSize(new Dimension(400,400));
+        setMinimumSize(new Dimension(600,500));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
         setLocationRelativeTo(null);
@@ -278,8 +289,10 @@ public class Calculadora extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (encendido){
-                    num2=Double.parseDouble(ScreenTXT.getText());
-                    Screen2TXT.setText(Screen2TXT.getText()+num2);
+                    if (!Objects.equals(operador, "!")){
+                        num2=Double.parseDouble(ScreenTXT.getText());
+                        Screen2TXT.setText(Screen2TXT.getText()+num2);
+                    }
 
                     switch (operador){
                         case "+":
@@ -299,20 +312,45 @@ public class Calculadora extends JFrame{
                             for (int i=0; i<num2;i++){
                                 result*=10;
                             }
-                            System.out.println(num1);
-                            System.out.println(num2);
-                            System.out.println(result);
                             break;
                         case "sen":
-                            /*grados -> rad junto a la función seno*/
-                            result= Math.sin(Math.toRadians(num2));
+                            if (!shift){
+                                /*grados -> rad junto a la función seno*/
+                                result= Math.sin(Math.toRadians(num2));
+                            } else {
+                                result = 1 / (Math.sin(Math.toRadians(num2)));
+                            }
                             break;
                         case "cos":
-                            result= Math.cos(Math.toRadians(num2));
+                            if (!shift){
+                                result= Math.cos(Math.toRadians(num2));
+                            }else {
+                                result= 1 / (Math.cos(Math.toRadians(num2)));
+                            }
                             break;
                         case "tan":
-                            result= Math.tan(Math.toRadians(num2));
+                            if (!shift){
+                                result= Math.tan(Math.toRadians(num2));
+                            } else {
+                                result= 1/(Math.tan(Math.toRadians(num2)));
+                            }
                             break;
+                        case "^":
+                            if (!shift){
+                                result= Math.pow(num1,num2);
+                            } else {
+                                result= Math.pow(num2, (1 / num1));
+                            }
+                            break;
+                        case "!":
+                            result = factorial(num1);
+                            break;
+                    }
+
+                    if (shift){
+                        shift=false;
+                        shiftButton.setBackground(btnON.getBackground());
+                        shiftButton.setForeground(Color.black);
                     }
 
                     num1 = num2 = 0;
@@ -325,7 +363,8 @@ public class Calculadora extends JFrame{
                             ScreenTXT.setText(int_woD);
                             result = Double.parseDouble(int_woD);
                         }else{
-                            ScreenTXT.setText(""+formatearDecimales(result,4));
+                            //ELIMINA NOTACION
+                            ScreenTXT.setText(""+df.format(formatearDecimales(result,4)));
                         }
                     } else {
                         ScreenTXT.setText(""+formatearDecimales(result,4));
@@ -338,6 +377,7 @@ public class Calculadora extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 encendido=true;
+                Screen2TXT.setText("");
                 ScreenTXT.setText("0");
             }
         });
@@ -357,7 +397,12 @@ public class Calculadora extends JFrame{
                 if (encendido){
                     num1=0;
                     operador="sen";
-                    Screen2TXT.setText("sen ");
+                    if (!shift){
+                        Screen2TXT.setText("sen ");
+                    } else {
+                        Screen2TXT.setText("cosec ");
+                    }
+
                 }
             }
         });
@@ -367,7 +412,12 @@ public class Calculadora extends JFrame{
                 if (encendido){
                     num1=0;
                     operador="cos";
-                    Screen2TXT.setText("cos ");
+                    if (!shift){
+                        Screen2TXT.setText("cos ");
+                    } else {
+                        Screen2TXT.setText("sec ");
+                    }
+
                 }
             }
         });
@@ -377,13 +427,84 @@ public class Calculadora extends JFrame{
                 if (encendido){
                     num1=0;
                     operador="tan";
-                    Screen2TXT.setText("tan ");
+                    if (!shift){
+                        Screen2TXT.setText("tan ");
+                    }else {
+                        Screen2TXT.setText("cotg ");
+                    }
+                }
+            }
+        });
+        lightButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (encendido){
+                    calcuPanel.setBackground(Color.LIGHT_GRAY);
+                }
+            }
+        });
+        darkButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (encendido){
+                    calcuPanel.setBackground(Color.DARK_GRAY);
+                }
+            }
+        });
+        shiftButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (encendido){
+                    if (shift){
+                        shift=false;
+                        shiftButton.setBackground(btnON.getBackground());
+                        shiftButton.setForeground(Color.black);
+                    } else {
+                        shift=true;
+                        shiftButton.setBackground(Color.white);
+                        shiftButton.setForeground(Color.red);
+                    }
+                }
+            }
+        });
+        btnElevado.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (encendido){
+                    num1=Double.parseDouble(ScreenTXT.getText());
+                    operador="^";
+                    if (!shift){
+                        ScreenTXT.setText("");
+                        Screen2TXT.setText(num1+"^");
+                    }else{
+                        ScreenTXT.setText("");
+                        Screen2TXT.setText(num1+"√");
+                    }
+                }
+            }
+        });
+        btnFact.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (encendido){
+                    num1=Double.parseDouble(ScreenTXT.getText());
+                    operador="!";
+
+                    Screen2TXT.setText(num1+operador);
                 }
             }
         });
     }
     public static Double formatearDecimales(Double numero, Integer numeroDecimales) {
         return Math.round(numero * Math.pow(10, numeroDecimales)) / Math.pow(10, numeroDecimales);
+    }
+
+    public static Double factorial (double numero){
+        if (numero==0){
+            return 1d;
+        }else {
+            return numero * factorial(numero-1);
+        }
     }
 
     public static void main(String[] args) {
