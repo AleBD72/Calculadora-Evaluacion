@@ -1,7 +1,11 @@
-# Repo_Calculadora
+# Evaluación - Calculadora
 1.	 Diseño
 
-    pendiente...
+  <img width="294" alt="image" src="https://user-images.githubusercontent.com/38541491/183766147-5fb6f19b-5817-43fe-ab34-6a327cb62f36.png">
+
+    
+   ## Link del video 
+   https://youtu.be/ju09EpPhqj0
 
 2. OPERACIONES 
     -	SUMA
